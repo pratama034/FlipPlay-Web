@@ -1,0 +1,10 @@
+# Ignore npm dependencies, but keep local FlipPlay frontend source files in node_modules/src/
+node_modules/*
+!node_modules/src/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

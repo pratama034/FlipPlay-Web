@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "dev": "node dev-server.js",
+    "build:css": "tailwindcss -i node_modules/src/main.css -o node_modules/src/output.css"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
