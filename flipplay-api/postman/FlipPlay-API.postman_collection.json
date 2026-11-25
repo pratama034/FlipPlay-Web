@@ -1,0 +1,660 @@
+{
+  "info": {
+    "_postman_id": "8e45a1c0-4f12-4d9a-9b18-flipplay0004",
+    "name": "FlipPlay REST API - Modul 4 (Laravel 12)",
+    "description": "Koleksi pengujian lengkap REST API FlipPlay (Laravel 12) mencakup CRUD Media, Custom Action Koleksi User, Happy Path, dan Failure Path (422, 409, 404).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Media CRUD (Happy Path)",
+      "item": [
+        {
+          "name": "GET List All Media (Paginated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has paginated data and meta', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('data');",
+                  "    pm.expect(json).to.have.property('meta');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/media",
+              "host": ["{{base_url}}"],
+              "path": ["media"]
+            }
+          }
+        },
+        {
+          "name": "GET Search Media (?search=Black)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Search returns matching title', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.length).to.be.above(0);",
+                  "    pm.expect(json.data[0].title.toLowerCase()).to.include('black');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/media?search=Black",
+              "host": ["{{base_url}}"],
+              "path": ["media"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Black"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Detail Media (With Users Relation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Includes loaded users array', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.have.property('users');",
+                  "    pm.expect(json.data.users).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/media/1",
+              "host": ["{{base_url}}"],
+              "path": ["media", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Create New Media (201 Created)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Created media matches payload', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.title).to.eql('Demon Slayer: Kimetsu no Yaiba');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Demon Slayer: Kimetsu no Yaiba\",\n  \"type\": \"anime\",\n  \"genre\": \"Action, Supernatural\",\n  \"release_year\": 2019,\n  \"total_units\": 26,\n  \"status\": \"completed\",\n  \"description\": \"Tanjiro Kamado menjadi pembasmi iblis demi menyembuhkan adiknya, Nezuko.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/media",
+              "host": ["{{base_url}}"],
+              "path": ["media"]
+            }
+          }
+        },
+        {
+          "name": "PATCH Update Media (Partial Update)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Updated total_units field', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.total_units).to.eql(38);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_units\": 38,\n  \"status\": \"ongoing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/media/3",
+              "host": ["{{base_url}}"],
+              "path": ["media", "3"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Destroy Media",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns deletion confirmation message', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Media berhasil dihapus');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/media/6",
+              "host": ["{{base_url}}"],
+              "path": ["media", "6"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. User Collection Custom Action (Happy Path)",
+      "item": [
+        {
+          "name": "GET User Collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns user profile with collection array', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.have.property('collection');",
+                  "    pm.expect(json.data.collection).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/1/collection",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1", "collection"]
+            }
+          }
+        },
+        {
+          "name": "POST Add Media to User Collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Media successfully attached to user collection', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.include('berhasil ditambahkan');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"media_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/1/collection",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1", "collection"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remove Media from User Collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns detach message', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Media berhasil dihapus dari koleksi');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/1/collection/2",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1", "collection", "2"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Failure Paths (422, 409, 404)",
+      "item": [
+        {
+          "name": "422 Unprocessable Entity - Invalid Fields (POST Media)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 422 Unprocessable Entity', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "pm.test('Contains Indonesian validation errors', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('errors');",
+                  "    pm.expect(json.errors).to.have.property('title');",
+                  "    pm.expect(json.errors).to.have.property('type');",
+                  "    pm.expect(json.errors).to.have.property('release_year');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"type\": \"drama\",\n  \"genre\": \"\",\n  \"release_year\": 1850,\n  \"total_units\": 0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/media",
+              "host": ["{{base_url}}"],
+              "path": ["media"]
+            }
+          }
+        },
+        {
+          "name": "422 Unprocessable Entity - Duplicate Title (POST Media)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 422 Unprocessable Entity', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "pm.test('Contains unique title validation error', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.errors).to.have.property('title');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Black Clover\",\n  \"type\": \"anime\",\n  \"genre\": \"Action, Fantasy\",\n  \"release_year\": 2017\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/media",
+              "host": ["{{base_url}}"],
+              "path": ["media"]
+            }
+          }
+        },
+        {
+          "name": "422 Unprocessable Entity - Invalid media_id (POST Collection)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 422 Unprocessable Entity', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "pm.test('Contains media_id exists validation error', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.errors).to.have.property('media_id');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"media_id\": 9999\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/1/collection",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1", "collection"]
+            }
+          }
+        },
+        {
+          "name": "409 Conflict - Duplicate Media in User Collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 409 Conflict', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test('Returns duplicate conflict message', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Media sudah ada di koleksi');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"media_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/1/collection",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1", "collection"]
+            }
+          }
+        },
+        {
+          "name": "404 Not Found - Media Tidak Ditemukan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404 Not Found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/media/9999",
+              "host": ["{{base_url}}"],
+              "path": ["media", "9999"]
+            }
+          }
+        },
+        {
+          "name": "404 Not Found - User Tidak Ditemukan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404 Not Found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/9999/collection",
+              "host": ["{{base_url}}"],
+              "path": ["users", "9999", "collection"]
+            }
+          }
+        },
+        {
+          "name": "404 Not Found - Media Tidak Ada di Koleksi User (DELETE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404 Not Found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('Returns collection item not found message', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.include('tidak ditemukan');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/1/collection/4",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1", "collection", "4"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
